@@ -2,10 +2,33 @@
 //
 
 #include <iostream>
+#include "windows.h"
 #include "threadpool.hpp"
+
+int async(int i)
+{
+    while (20)
+    {
+        std::cout << i;
+        Sleep(1000);
+    }
+    return 1;
+}
 
 int main()
 {
+    threadpool my(9);
+    
+    for (int i = 0; i < 8; i++)
+    {
+        my.async(async, i);
+        Sleep(100);
+    } 
+
+    while (1)
+    {
+        Sleep(2000);
+    }
     std::cout << "Hello World!\n";
 }
 

@@ -13,7 +13,11 @@ class threadpool
 {
 public:
 	threadpool(unsigned int _min_thread,  unsigned int _outtime_ms = 2000, unsigned int _max_thread = 256)
-		:min_thread{ _min_thread }, max_thread{ _max_thread }, outtime_ms{ _outtime_ms }, idle_thread{ _min_thread  }, current_thread{ _min_thread },
+		:min_thread{ _min_thread },
+		max_thread{ _max_thread },
+		outtime_ms{ _outtime_ms },
+		idle_thread{ _min_thread },
+		current_thread{ _min_thread },
 		demon_thread{ &threadpool::demon_task,this }
 	{
 		while (_min_thread--) {
@@ -23,10 +27,10 @@ public:
 	}
 	~threadpool() { }
 	template<typename Func,typename... Param>
-	auto async(Func&& func, Param &&... params) -> std::future<typename std::result_of<Func(Param...)>::type>
+	auto async(Func&& func, Param &&... params)->std::future<typename std::result_of<Func(Param...)>::type>
 	{
 		auto execute = std::bind(std::forward<Func>(func), std::forward<Param>(params)...);
-		auto task = std::make_shared<std::packaged_task<std::result_of<Func(Param...)>::type>>(std::move(execute));
+		auto task = std::make_shared<std::packaged_task<typename std::result_of<Func(Param...)>::type()> >(std::move(execute));
 		auto result = task->get_future();
 		std::lock_guard<std::mutex> lock(guard_mutex);
 		tasks.emplace([task] { (*task)(); });
@@ -34,7 +38,6 @@ public:
 		return result;
 	}
 private:
-	void x(){  };
 	void worker()
 	{
 		while (!is_quit)
@@ -42,7 +45,7 @@ private:
 			std::function<void(void)> task;
 			{
 				std::unique_lock<std::mutex> lock(guard_mutex);
-				bool is_timeout = !signal.wait_for(lock, std::chrono::milliseconds(outtime_ms ), [this] { return is_quit || tasks.empty(); });
+				bool is_timeout = !signal.wait_for(lock, std::chrono::milliseconds(outtime_ms ), [this] { return is_quit || !tasks.empty(); });
 				idle_thread--;
 				if (is_timeout)	{
 					if (is_quit)return;
@@ -88,7 +91,7 @@ private:
 	const unsigned int min_thread;
 	const unsigned int max_thread;
 	const unsigned int outtime_ms;
-	unsigned int idle_thread;
+	std::atomic<unsigned int> idle_thread;
 	unsigned int current_thread;
 	mutable std::mutex guard_mutex;
 	std::condition_variable signal;
