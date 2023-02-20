@@ -4,11 +4,11 @@ Basic usage:
 
     // create thread pool with 4 worker threads
 
-    ThreadPool pool(4);
+    threadpool pool(4);
 
     // enqueue and store future
 
-    auto result = pool.enqueue([](int answer) { return answer; }, 42);
+    auto result = pool.async([](int answer) { return answer; }, 42);
 
     // get result from future
 
