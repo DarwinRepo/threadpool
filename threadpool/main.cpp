@@ -14,16 +14,12 @@ int async(int i)
 
 int main()
 {
-    threadpool my(9);
-    int i = 10;   
-    i = 10;
+    threadpool my(5);
+    int i = 9;   
     while (i--)
     {
         my.async(async, i);
-        my.async(async, i);
         Sleep(100);
-    }
-
-    std::cout << "Hello World!\n";    
+    } 
 }
 
