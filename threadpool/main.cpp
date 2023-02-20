@@ -7,7 +7,7 @@
 
 int async(int i)
 {
-    while (20)
+    while (i--)
     {
         std::cout << i;
         Sleep(1000);
@@ -18,18 +18,16 @@ int async(int i)
 int main()
 {
     threadpool my(9);
-    
-    for (int i = 0; i < 8; i++)
+    int i = 10;   
+    i = 10;
+    while (i--)
     {
         my.async(async, i);
+        my.async(async, i);
         Sleep(100);
-    } 
-
-    while (1)
-    {
-        Sleep(2000);
     }
-    std::cout << "Hello World!\n";
+
+    std::cout << "Hello World!\n";    
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
