@@ -13,7 +13,7 @@
 class threadpool
 {
 public:
-	threadpool(unsigned int _min_thread,  unsigned int _outtime_ms = 2000, unsigned int _max_thread = 256)
+	threadpool(unsigned int _min_thread, unsigned int _outtime_ms = 2000, unsigned int _max_thread = 256)
 		:min_thread{ _min_thread },
 		max_thread{ _max_thread },
 		outtime_ms{ _outtime_ms },
@@ -27,8 +27,8 @@ public:
 		}
 	}
 	~threadpool() {
-		is_quit = true; 		
-		signal.notify_all(); 
+		is_quit = true;
+		signal.notify_all();
 		for (auto& it : thread_pool) {
 			assert(it.second.joinable());
 			it.second.join();
@@ -36,8 +36,8 @@ public:
 		deamon_tasks.add(std::make_pair(0, std::thread::id()));
 		demon_thread.join();
 	}
-	template<typename Func,typename... Param>
-	auto async(Func&& func, Param &&... params)->std::future<typename std::result_of<Func(Param...)>::type>
+	template<typename Func, typename... Param>
+	auto async(Func&& func, Param &&... params) -> std::future<typename std::result_of<Func(Param...)>::type>
 	{
 		auto execute = std::bind(std::forward<Func>(func), std::forward<Param>(params)...);
 		auto task = std::make_shared<std::packaged_task<typename std::result_of<Func(Param...)>::type()> >(std::move(execute));
@@ -58,9 +58,10 @@ private:
 				bool is_timeout = !signal.wait_for(lock, std::chrono::milliseconds(outtime_ms), [this] { return is_quit || !tasks.empty(); });
 				idle_thread--;
 				if (is_quit)return;
-				if (is_timeout)	{					
+				if (is_timeout) {
+
 					if (tasks.empty()) {
-						if (current_thread > min_thread && idle_thread != 0 ) {
+						if (current_thread > min_thread && idle_thread != 0) {
 							deamon_tasks.add(std::make_pair(1, std::this_thread::get_id()));
 							current_thread--;
 							break;
@@ -73,7 +74,7 @@ private:
 				}
 				if (idle_thread == 0 && current_thread < max_thread) {
 					deamon_tasks.add(std::make_pair(2, std::thread::id()));
-					current_thread++; idle_thread++; 
+					current_thread++; idle_thread++;
 				}
 				task = std::move(tasks.front());
 				tasks.pop();
@@ -97,8 +98,8 @@ private:
 			case 2:
 				std::thread new_thread{ &threadpool::worker,this };
 				thread_pool.emplace(new_thread.get_id(), std::move(new_thread));
-				break;			
-			}	
+				break;
+			}
 		}
 	}
 
@@ -110,7 +111,7 @@ private:
 	unsigned int current_thread;
 	mutable std::mutex guard_mutex;
 	std::condition_variable signal;
-	std::queue<std::function<void(void)>> tasks{};	
+	std::queue<std::function<void(void)>> tasks{};
 	std::atomic<bool> is_quit{ false };
 	std::unordered_map<std::thread::id, std::thread> thread_pool;
 	std::thread demon_thread;
