@@ -19,7 +19,7 @@ public:
 		outtime_ms{ _outtime_ms },
 		idle_thread{ _min_thread },
 		current_thread{ _min_thread },
-		demon_thread{ &threadpool::demon_task,this }
+		deamon_thread{ &threadpool::deamon_task,this }
 	{
 		while (_min_thread--) {
 			std::thread new_thread{ &threadpool::worker,this };
@@ -34,7 +34,7 @@ public:
 			it.second.join();
 		}
 		deamon_tasks.add(std::make_pair(0, std::thread::id()));
-		demon_thread.join();
+		deamon_thread.join();
 	}
 	template<typename Func, typename... Param>
 	auto async(Func&& func, Param &&... params) -> std::future<typename std::result_of<Func(Param...)>::type>
@@ -83,7 +83,7 @@ private:
 			idle_thread++;
 		}
 	}
-	void demon_task()
+	void deamon_task()
 	{
 		while (!is_quit) {
 			auto bg_task = deamon_tasks.get();
@@ -114,7 +114,7 @@ private:
 	std::queue<std::function<void(void)>> tasks{};
 	std::atomic<bool> is_quit{ false };
 	std::unordered_map<std::thread::id, std::thread> thread_pool;
-	std::thread demon_thread;
+	std::thread deamon_thread;
 	msgqueue<std::pair<unsigned int, std::thread::id> > deamon_tasks;
 };
 
