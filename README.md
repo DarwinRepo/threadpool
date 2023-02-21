@@ -8,7 +8,7 @@ Basic usage:
 
     // enqueue and store future
 
-    auto result = pool.async([](int answer) { return answer; }, 42);
+    auto result = pool.async([](int answer) { return answer; });
 
     // get result from future
 
