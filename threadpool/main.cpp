@@ -16,6 +16,7 @@ class myclass
 public:
 	void async() { return; }
 	int async1(int i) { return i; }
+    int reftest(int& i) { i++; return i; }
 };
 
 int main()
@@ -56,6 +57,12 @@ int main()
     {
         res[i] = fu[i].get();
     }
-    //demo F for ~threadpool
+    //demo F for ref
+    int refs = 9;
+    auto& ref = refs;
+    my.async(&myclass::reftest, mycl, ref);
+    Sleep(1000);
+    std::cout << refs;
+    //demo G for ~threadpool
 }
 
